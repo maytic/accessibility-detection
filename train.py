@@ -3,6 +3,7 @@ import os
 import tensorflow as tf
 
 from mediapipe_model_maker import object_detector
+from mediapipe_model_maker.python.core.utils import quantization
 
 
 
@@ -70,16 +71,24 @@ loss, coco_metrics = model.evaluate(validation_data, batch_size=32)
 print('float model:', coco_metrics)
 
 
-# quantization-aware training, then export as an int8 tflite.
-# QAT mutates model._model in place, so re-running QAT on this same model
-# instance requires model.restore_float_ckpt() first (see its docstring).
-qat_hparams = object_detector.QATHParams()
-model.quantization_aware_training(train_data, validation_data, qat_hparams=qat_hparams)
-
-qat_loss, qat_coco_metrics = model.evaluate(validation_data, batch_size=32)
-print('qat int8 model:', qat_coco_metrics)
-
-model.export_model(model_name='accessibility_detector.tflite')
+# NOTE: mediapipe_model_maker's quantization_aware_training() is broken for
+# MOBILENET_MULTI_AVG (and other MULTI specs): it silently wrecks the
+# detection head and produces a near-zero-AP model. This is a known,
+# unresolved upstream bug -- see
+# https://discuss.ai.google.dev/t/mediapipe-massive-accuracy-loss-with-quantization-aware-training/23177
+# where another user reports AP collapsing from 0.88 to 0.006 after QAT with
+# the same model family, and a maintainer confirms it's unfixed.
+#
+# So skip QAT entirely and use standard post-training int8 quantization
+# instead: it calibrates activation ranges from real (unlabeled) data without
+# retraining the fake-quant graph, and isn't affected by this bug.
+quantization_config = quantization.QuantizationConfig.for_int8(
+    representative_data=train_data
+)
+model.export_model(
+    model_name='accessibility_detector.tflite',
+    quantization_config=quantization_config,
+)
 
 
 # MOBILENET_V2 baseline
