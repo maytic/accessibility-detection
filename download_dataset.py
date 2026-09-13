@@ -61,6 +61,8 @@ def filter_and_download(split, ann_dir, max_images):
     if missing:
         print(f"Warning: classes not found in COCO: {missing}")
 
+    id_remap = {old_id: new_id for new_id, old_id in enumerate(sorted(cat_ids), start=1)}
+
     # Per-category image-id sets (still one call per category -- getImgIds
     # with a multi-item catIds list is an AND filter, not OR).
     per_cat_img_ids = {
@@ -100,17 +102,22 @@ def filter_and_download(split, ann_dir, max_images):
     # write a filtloadAnnsered annotation file containing only the kept images/cats
     ann_ids = coco.getAnnIds(imgIds=img_ids, catIds=cat_ids)
     anns = coco.loadAnns(ann_ids)
+    for a in anns:
+        a["category_id"] = id_remap[a["category_id"]]
+    categories = coco.loadCats(cat_ids)
+    for c in categories:
+        c["id"] = id_remap[c["id"]]
     filtered = {
         "images": imgs,
         "annotations": anns,
-        "categories": coco.loadCats(cat_ids),
+        "categories": categories,
     }
     out_path = DATASET_ROOT / f"instances_{split}_subset.json"
     with open(out_path, "w") as f:
         json.dump(filtered, f)
     print(f"{split}: wrote {out_path} ({len(anns)} annotations, {len(imgs)} images)")
 
-    cat_names = {c["id"]: c["name"] for c in coco.loadCats(cat_ids)}
+    cat_names = {c["id"]: c["name"] for c in categories}
     counts = Counter(a["category_id"] for a in anns)
     print(f"{split}: per-class annotation counts:")
     for cat_id, count in counts.most_common():
