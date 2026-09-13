@@ -18,7 +18,7 @@ from pycocotools import cocoeval as _cocoeval_module
 from mediapipe_model_maker import object_detector
 
 # Must match whichever spec produced the checkpoint in exported_model/float_ckpt.
-TRAINED_SPEC = object_detector.SupportedModels.MOBILENET_V2_I320
+TRAINED_SPEC = object_detector.SupportedModels.MOBILENET_MULTI_AVG_I384
 EXPORT_DIR = "exported_model"
 
 _orig_summarize = _cocoeval_module.COCOeval.summarize
@@ -107,18 +107,18 @@ for name, metrics in sorted(
 
 
 # class                 AP    AP50   AR100
-# stop sign          0.621   0.710   0.651
-# fire hydrant       0.456   0.611   0.536
-# bus                0.370   0.516   0.495
-# motorcycle         0.275   0.571   0.424
-# person             0.262   0.518   0.367
-# car                0.171   0.332   0.301
-# truck              0.158   0.252   0.398
-# bicycle            0.136   0.286   0.225
-# bench              0.098   0.218   0.236
-# traffic light      0.049   0.115   0.125
-# dog                0.000   0.000   0.000
-# backpack           0.000   0.000   0.000
-# suitcase           0.000   0.000   0.000
-# chair              0.000   0.000   0.000
-# potted plant       0.000   0.000   0.000
+# stop sign          0.626   0.730   0.663
+# fire hydrant       0.464   0.615   0.551
+# dog                0.441   0.689   0.586
+# bus                0.407   0.582   0.543
+# motorcycle         0.358   0.646   0.467
+# person             0.300   0.562   0.412
+# car                0.216   0.402   0.351
+# truck              0.193   0.343   0.435
+# potted plant       0.191   0.428   0.405
+# bicycle            0.188   0.368   0.298
+# suitcase           0.169   0.308   0.342
+# chair              0.130   0.243   0.303
+# bench              0.090   0.189   0.262
+# traffic light      0.066   0.180   0.163
+# backpack           0.052   0.100   0.157

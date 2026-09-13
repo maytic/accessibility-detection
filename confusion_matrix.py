@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from mediapipe_model_maker import object_detector
 
-TRAINED_SPEC = object_detector.SupportedModels.MOBILENET_V2_I320
+TRAINED_SPEC = object_detector.SupportedModels.MOBILENET_MULTI_AVG_I384
 EXPORT_DIR = "exported_model"
 IOU_MATCH_THRESHOLD = 0.5
 CONFIDENCE_THRESHOLD = 0.3
